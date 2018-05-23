@@ -1,0 +1,145 @@
+Version 3.2 HI-TECH Software Intermediate Code
+"14 queue.h
+[s S5 `*v -> 10 `i `ui 1 `ui 1 `ui 1 ]
+[n S5 queue queue_buffer queue_insert_pos queue_remove_pos queue_size ]
+[; ;stdint.h: 13: typedef signed char int8_t;
+[; ;stdint.h: 20: typedef signed int int16_t;
+[; ;stdint.h: 38: typedef signed long int int32_t;
+[; ;stdint.h: 45: typedef unsigned char uint8_t;
+[; ;stdint.h: 51: typedef unsigned int uint16_t;
+[; ;stdint.h: 67: typedef unsigned long int uint32_t;
+[; ;stdint.h: 75: typedef signed char int_least8_t;
+[; ;stdint.h: 82: typedef signed int int_least16_t;
+[; ;stdint.h: 104: typedef signed long int int_least32_t;
+[; ;stdint.h: 111: typedef unsigned char uint_least8_t;
+[; ;stdint.h: 117: typedef unsigned int uint_least16_t;
+[; ;stdint.h: 136: typedef unsigned long int uint_least32_t;
+[; ;stdint.h: 145: typedef signed char int_fast8_t;
+[; ;stdint.h: 152: typedef signed int int_fast16_t;
+[; ;stdint.h: 174: typedef signed long int int_fast32_t;
+[; ;stdint.h: 181: typedef unsigned char uint_fast8_t;
+[; ;stdint.h: 187: typedef unsigned int uint_fast16_t;
+[; ;stdint.h: 206: typedef unsigned long int uint_fast32_t;
+[; ;stdint.h: 212: typedef int32_t intmax_t;
+[; ;stdint.h: 217: typedef uint32_t uintmax_t;
+[; ;stdint.h: 222: typedef int16_t intptr_t;
+[; ;stdint.h: 227: typedef uint16_t uintptr_t;
+[; ;types.h: 24: typedef unsigned char byte;
+[; ;types.h: 25: typedef unsigned u_int;
+[; ;types.h: 26: typedef enum {READY = 0, RUNNING, WAITING, FINISHED} t_state;
+[; ;types.h: 27: typedef void TASK;
+[; ;types.h: 28: typedef void(*task_ptr)(void);
+[; ;types.h: 29: typedef unsigned short long int uint24_t;
+[; ;types.h: 32: typedef struct task_queue {
+[; ;types.h: 33: u_int TOSU_reg;
+[; ;types.h: 34: u_int TOSH_reg;
+[; ;types.h: 35: u_int TOSL_reg;
+[; ;types.h: 36: } t_task_queue;
+[; ;types.h: 39: typedef struct task_ctx {
+[; ;types.h: 40: byte WORK_reg;
+[; ;types.h: 41: byte STAT_reg;
+[; ;types.h: 42: byte BSR_reg;
+[; ;types.h: 43: t_task_queue task_stack[31];
+[; ;types.h: 44: u_int task_stack_size;
+[; ;types.h: 45: } t_task_ctx;
+[; ;types.h: 48: typedef struct tcb {
+[; ;types.h: 49: u_int task_id;
+[; ;types.h: 50: t_state task_state;
+[; ;types.h: 51: u_int task_prior;
+[; ;types.h: 52: u_int task_prior_count;
+[; ;types.h: 53: task_ptr func;
+[; ;types.h: 54: t_task_ctx ctx;
+[; ;types.h: 55: } t_tcb;
+[; ;types.h: 58: typedef struct task_delay_queue {
+[; ;types.h: 59: u_int task_pos_ready_queue;
+[; ;types.h: 60: u_int delay_ms;
+[; ;types.h: 61: } t_task_delay_queue;
+"12 macos_config.h
+[p x WDT=OFF ]
+"13
+[p x OSC=HS ]
+[; ;queue.h: 12: typedef void* queue_item;
+[; ;queue.h: 14: typedef struct queue {
+[; ;queue.h: 15: queue_item queue_buffer[10];
+[; ;queue.h: 16: u_int queue_insert_pos;
+[; ;queue.h: 17: u_int queue_remove_pos;
+[; ;queue.h: 18: u_int queue_size;
+[; ;queue.h: 19: } t_queue;
+[; ;queue.h: 21: void create_queue(t_queue *q);
+[; ;queue.h: 22: void write_queue(t_queue *q, queue_item item);
+[; ;queue.h: 23: queue_item read_queue(t_queue *q);
+"9 queue.c
+[v _create_queue `(v ~T0 @X0 1 ef1`*S5 ]
+"10
+{
+[; ;queue.c: 9: void create_queue(t_queue *q)
+[; ;queue.c: 10: {
+[e :U _create_queue ]
+"9
+[v _q `*S5 ~T0 @X0 1 r1 ]
+"10
+[f ]
+[; ;queue.c: 11: q->queue_insert_pos = 0;
+"11
+[e = . *U _q 1 -> -> 0 `i `ui ]
+[; ;queue.c: 12: q->queue_remove_pos = 0;
+"12
+[e = . *U _q 2 -> -> 0 `i `ui ]
+[; ;queue.c: 13: q->queue_size = 0;
+"13
+[e = . *U _q 3 -> -> 0 `i `ui ]
+[; ;queue.c: 14: }
+"14
+[e :UE 6 ]
+}
+"16
+[v _write_queue `(v ~T0 @X0 1 ef2`*S5`*v ]
+"17
+{
+[; ;queue.c: 16: void write_queue(t_queue *q, queue_item item)
+[; ;queue.c: 17: {
+[e :U _write_queue ]
+"16
+[v _q `*S5 ~T0 @X0 1 r1 ]
+[v _item `*v ~T0 @X0 1 r2 ]
+"17
+[f ]
+[; ;queue.c: 18: q->queue_buffer[q->queue_insert_pos] = item;
+"18
+[e = *U + &U . *U _q 0 * -> . *U _q 1 `ux -> -> # *U &U . *U _q 0 `ui `ux _item ]
+[; ;queue.c: 19: q->queue_insert_pos = (q->queue_insert_pos + 1) % 10;
+"19
+[e = . *U _q 1 % + . *U _q 1 -> -> 1 `i `ui -> -> 10 `i `ui ]
+[; ;queue.c: 20: q->queue_size++;
+"20
+[e ++ . *U _q 3 -> -> 1 `i `ui ]
+[; ;queue.c: 21: }
+"21
+[e :UE 7 ]
+}
+"23
+[v _read_queue `(*v ~T0 @X0 1 ef1`*S5 ]
+"24
+{
+[; ;queue.c: 23: queue_item read_queue(t_queue *q)
+[; ;queue.c: 24: {
+[e :U _read_queue ]
+"23
+[v _q `*S5 ~T0 @X0 1 r1 ]
+"24
+[f ]
+"25
+[v _item `*v ~T0 @X0 1 a ]
+[; ;queue.c: 25: queue_item item = q->queue_buffer[q->queue_remove_pos];
+[e = _item *U + &U . *U _q 0 * -> . *U _q 2 `ux -> -> # *U &U . *U _q 0 `ui `ux ]
+[; ;queue.c: 26: q->queue_remove_pos = (q->queue_remove_pos + 1) % (q->queue_insert_pos + q->queue_size);
+"26
+[e = . *U _q 2 % + . *U _q 2 -> -> 1 `i `ui + . *U _q 1 . *U _q 3 ]
+[; ;queue.c: 28: return item;
+"28
+[e ) _item ]
+[e $UE 8  ]
+[; ;queue.c: 29: }
+"29
+[e :UE 8 ]
+}

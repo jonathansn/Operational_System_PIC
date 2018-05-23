@@ -1,0 +1,156 @@
+
+# 1 "queue.c"
+
+# 13 "D:\Programas\MPLABX\xc8\include\stdint.h"
+typedef signed char int8_t;
+
+# 20
+typedef signed int int16_t;
+
+# 38
+typedef signed long int int32_t;
+
+# 45
+typedef unsigned char uint8_t;
+
+# 51
+typedef unsigned int uint16_t;
+
+# 67
+typedef unsigned long int uint32_t;
+
+# 75
+typedef signed char int_least8_t;
+
+# 82
+typedef signed int int_least16_t;
+
+# 104
+typedef signed long int int_least32_t;
+
+# 111
+typedef unsigned char uint_least8_t;
+
+# 117
+typedef unsigned int uint_least16_t;
+
+# 136
+typedef unsigned long int uint_least32_t;
+
+# 145
+typedef signed char int_fast8_t;
+
+# 152
+typedef signed int int_fast16_t;
+
+# 174
+typedef signed long int int_fast32_t;
+
+# 181
+typedef unsigned char uint_fast8_t;
+
+# 187
+typedef unsigned int uint_fast16_t;
+
+# 206
+typedef unsigned long int uint_fast32_t;
+
+# 212
+typedef int32_t intmax_t;
+
+
+
+
+typedef uint32_t uintmax_t;
+
+
+
+
+typedef int16_t intptr_t;
+
+
+
+
+typedef uint16_t uintptr_t;
+
+# 24 "types.h"
+typedef unsigned char byte;
+typedef unsigned u_int;
+typedef enum {READY = 0, RUNNING, WAITING, FINISHED} t_state;
+typedef void TASK;
+typedef void(*task_ptr)(void);
+typedef unsigned short long int uint24_t;
+
+
+typedef struct task_queue {
+u_int TOSU_reg;
+u_int TOSH_reg;
+u_int TOSL_reg;
+} t_task_queue;
+
+
+typedef struct task_ctx {
+byte WORK_reg;
+byte STAT_reg;
+byte BSR_reg;
+t_task_queue task_stack[31];
+u_int task_stack_size;
+} t_task_ctx;
+
+
+typedef struct tcb {
+u_int task_id;
+t_state task_state;
+u_int task_prior;
+u_int task_prior_count;
+task_ptr func;
+t_task_ctx ctx;
+} t_tcb;
+
+
+typedef struct task_delay_queue {
+u_int task_pos_ready_queue;
+u_int delay_ms;
+} t_task_delay_queue;
+
+
+# 12 "macos_config.h"
+#pragma config WDT = 0
+#pragma config OSC = HS
+
+# 12 "queue.h"
+typedef void* queue_item;
+
+typedef struct queue {
+queue_item queue_buffer[10];
+u_int queue_insert_pos;
+u_int queue_remove_pos;
+u_int queue_size;
+} t_queue;
+
+void create_queue(t_queue *q);
+void write_queue(t_queue *q, queue_item item);
+queue_item read_queue(t_queue *q);
+
+# 9 "queue.c"
+void create_queue(t_queue *q)
+{
+q->queue_insert_pos = 0;
+q->queue_remove_pos = 0;
+q->queue_size = 0;
+}
+
+void write_queue(t_queue *q, queue_item item)
+{
+q->queue_buffer[q->queue_insert_pos] = item;
+q->queue_insert_pos = (q->queue_insert_pos + 1) % 10;
+q->queue_size++;
+}
+
+queue_item read_queue(t_queue *q)
+{
+queue_item item = q->queue_buffer[q->queue_remove_pos];
+q->queue_remove_pos = (q->queue_remove_pos + 1) % (q->queue_insert_pos + q->queue_size);
+
+return item;
+}
